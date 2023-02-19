@@ -1,0 +1,10 @@
+SET standard_conforming_strings = OFF;
+DROP TABLE IF EXISTS "public"."db" CASCADE;
+BEGIN;
+CREATE TABLE "public"."db" ( "ogc_fid" SERIAL, CONSTRAINT "db_pk" PRIMARY KEY ("ogc_fid") );
+SELECT AddGeometryColumn('public','db','wkb_geometry',4326,'POINT',2);
+CREATE INDEX "db_wkb_geometry_geom_idx" ON "public"."db" USING GIST ("wkb_geometry");
+ALTER TABLE "public"."db" ADD COLUMN "id" NUMERIC(10,0);
+ALTER TABLE "public"."db" ADD COLUMN "vorname" VARCHAR;
+ALTER TABLE "public"."db" ADD COLUMN "nachname" VARCHAR;
+COMMIT;

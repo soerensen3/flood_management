@@ -1,0 +1,8 @@
+pandas~=1.5.3
+geopandas~=0.12.2
+psycopg2~=2.9.5
+GeoAlchemy2~=0.13.1
+Faker~=17.0.0
+postgis~=1.0.4
+SQLAlchemy~=2.0.4
+shapely~=2.0.1

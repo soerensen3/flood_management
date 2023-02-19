@@ -1,0 +1,93 @@
+<!doctype html>
+<title>{% block title %}{% endblock %}</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+<link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet'/>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src='https://github.com/acalcutt/maplibre-gl-inspect/releases/download/v1.4.6/maplibre-gl-inspect.min.js'></script>
+<link href='https://github.com/acalcutt/maplibre-gl-inspect/releases/download/v1.4.6/maplibre-gl-inspect.css' rel='stylesheet' />
+
+<section class="content">
+<div id='map'></div>
+</section>
+<script>
+var map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://sgx.geodatenzentrum.de/gdz_basemapde_vektor/styles/bm_web_gry.json',
+  "center": [ 7.1, 50.73 ],
+  "zoom": 12.0
+});
+
+
+map.on('load', () => {
+  map.addSource('fieldworker', {
+    type: 'geojson',
+    data: 'http://localhost:5000/collections/fieldworker/items?f=json&limit=10000'
+  });
+
+  map.addLayer({
+    'id': 'fieldworker_circle',
+    'type': 'circle',
+    'source': 'fieldworker',
+    'paint': {
+        'circle-radius': 10,
+        'circle-stroke-width': 5,
+        'circle-color': '#007cbf',
+        'circle-stroke-color': 'white'
+    }
+  });
+
+  map.addLayer({
+    'id': 'fieldworker_txt',
+    'type': 'symbol',
+    'source': 'fieldworker',
+    'layout': {
+        'text-field': ["format", ["get", "vorname"], {}, ["literal", " "], {}, ["get", "nachname"], {}],
+        'text-font': ['Roboto Bold'],
+        'text-size': 16,
+        'text-offset': [0, -1.3]
+     },
+     'paint': {
+        'text-color': '#007cbf',
+        'text-halo-color': '#FFFFFF',
+        'text-halo-width': 5
+     }
+  });
+
+  var popup = new maplibregl.Popup({
+    offset: 10,
+    closeButton: false,
+    closeOnClick: true
+  });
+
+  map.on('click', function(e) {
+    let features = map.queryRenderedFeatures(e.point);
+    if (features.length) {
+        var popupContent = "<b>Name: </b>" + features[0].properties['vorname'] + " " + features[0].properties['nachname'];
+        popup
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(map);
+    }
+  });
+
+  map.on('mousemove', function(e) {
+    if (map.queryRenderedFeatures(e.point).length) {
+      map.getCanvas().style.cursor = 'pointer';
+    } else {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+    }
+  });
+});
+
+map.addControl(new maplibregl.NavigationControl());
+map.addControl(new maplibregl.ScaleControl());
+map.addControl(new MaplibreInspect());
+
+/*
+map.on('load', function() {
+
+});
+*/
+</script>

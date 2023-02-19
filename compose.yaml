@@ -1,0 +1,34 @@
+version: '3.9'
+volumes:
+  postgis-data:
+
+services:
+
+  db:
+    image: postgis/postgis:latest
+    volumes:
+      - postgis-data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    env_file: .env
+    restart: on-failure
+    healthcheck:
+      test: "PGPASSWORD=${POSTGRES_PASSWORD} pg_isready -h 127.0.0.1 -U docker -d ${POSTGRES_DB}"
+
+
+  pygeoapi:
+    image: geopython/pygeoapi:latest
+
+    volumes:
+      - ./config/pygeoapiconf.yml:/pygeoapi/local.config.yml
+    ports:
+      - "5000:80"
+    env_file: .env
+    restart: on-failure
+
+  web:
+    build:
+      context: app
+      target: builder
+    ports:
+      - '8000:8000'
